@@ -1,6 +1,6 @@
 # 项目说明
 
-程序可通过直接点击 [项目地址](https://kuangdash.github.io/LogicR/index.html) 打开，
+程序可通过直接点击 [项目地址](https://kuangdash.github.io/LogicR/index.html) 打开（推荐使用 Firefox。对于 Chrome 无法使用模块高亮），
 
 之后在“解析文本”按钮上面的文本框内输入“逆波兰逻辑表达式”，
 
