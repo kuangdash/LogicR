@@ -39,18 +39,18 @@ function LogicParser(npn) {
             }
         }
     };
-    var equalM = function (a, b){
+    var equalM = function (a, b) {
         return {
-            "S":a,
-            "0":{
-                "S":b,
-                "0":"1",
-                "1":"0"
+            "S": a,
+            "0": {
+                "S": b,
+                "0": "1",
+                "1": "0"
             },
-            "1":{
-                "S":b,
-                "0":"0",
-                "1":"1"
+            "1": {
+                "S": b,
+                "0": "0",
+                "1": "1"
             }
         }
     };
@@ -66,7 +66,7 @@ function LogicParser(npn) {
        "<": "not"
        "=": "equal"
      */
-    if(""==npn){return "Empty String!"};
+    if ("" == npn) { return "Empty String!" };
     for (var e = [], s = npn.split(/(\.|,|<|>|=|\s)/), t = 0;
         t < s.length; t++) {
         var n = s[t];
@@ -163,13 +163,13 @@ function ModelGen(np) {
         order: []
     };
     if ("string" == typeof (np)) {
-        if("1"==np){
-            result.value = [{".":">"}];
+        if ("1" == np) {
+            result.value = [{ ".": ">" }];
             result.order = [];
-        }else if("0"==np){
-            result.value = [{".":"<"}];
+        } else if ("0" == np) {
+            result.value = [{ ".": "<" }];
             result.order = [];
-        }else{
+        } else {
             var temp1 = { ".": ">" };
             var temp2 = { ".": "<" };
             temp1[np] = ">";
@@ -177,32 +177,32 @@ function ModelGen(np) {
             result.value = [temp1, temp2];
             result.order = [np];
         }
-        
-    }
-    else{
-        var result1=ModelGen(np.S);
 
-        if(0==result1.order.length){
-            if("<"==result1.value[0]["."]){
-                result=ModelGen(np[0]);
-            }else{
-                result=ModelGen(np[1]);
+    }
+    else {
+        var result1 = ModelGen(np.S);
+
+        if (0 == result1.order.length) {
+            if ("<" == result1.value[0]["."]) {
+                result = ModelGen(np[0]);
+            } else {
+                result = ModelGen(np[1]);
             }
         }
-        else{
+        else {
             var myset = new Set(result1.order);
 
-            var result2=ModelGen(np[0]);
+            var result2 = ModelGen(np[0]);
             var intersection2 = result2.order.filter(x => myset.has(x));
 
-            var result3=ModelGen(np[1]);
+            var result3 = ModelGen(np[1]);
             var intersection3 = result3.order.filter(x => myset.has(x));
 
-            var all0=false;
-            var all1=false;
+            var all0 = false;
+            var all1 = false;
 
             for (let x of result1.value) {
-                if("<"==x["."]){
+                if ("<" == x["."]) {
                     for (let y of result2.value) {
                         var YesOrNot = true;
                         for (let z of intersection2) {
@@ -225,7 +225,7 @@ function ModelGen(np) {
                             newValue["."] = y["."];
                             if (">" == newValue["."]) {
                                 all1 = true;
-                            }else{
+                            } else {
                                 all0 = true;
                             };
                             result.value.push(newValue);
@@ -255,7 +255,7 @@ function ModelGen(np) {
                             newValue["."] = y["."];
                             if (">" == newValue["."]) {
                                 all1 = true;
-                            }else{
+                            } else {
                                 all0 = true;
                             };
                             result.value.push(newValue);
@@ -274,11 +274,11 @@ function ModelGen(np) {
                     order: []
                 }
             }
-            else{
-                var tempOrder=new Set(
+            else {
+                var tempOrder = new Set(
                     result1.order.concat(result2.order).concat(result3.order)
                 );
-                result.order=Array.from(tempOrder);
+                result.order = Array.from(tempOrder);
             }
         }
     }
@@ -310,33 +310,38 @@ function ViewGen(pn) {
             }
         }
         else {
-            var countN = 1;
-            var CName = pnp.order[0];
-            while (0 == pnp.value.filter(function (x) { return undefined != x[CName] }).length && undefined!=CName) {
-                var CName = pnp.order[countN];
-                countN++;
+            var CName = "";
+            for (CName0 of pnp.order) {
+                if (pnp.value.length == pnp.value.filter(function (x) { return undefined != x[CName0] }).length) {
+                    CName = CName0;
+                }
             }
-            var TempOrder = pnp.order.slice(countN);
 
-            var pnp1 = {
-                value: pnp.value.filter(function (x) { return "<" == x[CName] }),
-                order: TempOrder
-            };
-            var pnp2 = {
-                value: pnp.value.filter(function (x) { return ">" == x[CName] }),
-                order: TempOrder
-            };
+            if ("" != CName) {
+                var TempOrder = pnp.order.filter(function(x){
+                    return x  != CName
+                });
 
-            countKey++;
-            var NodeKeyNow = countKey;
-            var NodeLink1 = ViewGen0(pnp1, NodeKeyNow, "0");
-            var NodeLink2 = ViewGen0(pnp2, NodeKeyNow, "1");
+                var pnp1 = {
+                    value: pnp.value.filter(function (x) { return "<" == x[CName] }),
+                    order: TempOrder
+                };
+                var pnp2 = {
+                    value: pnp.value.filter(function (x) { return ">" == x[CName] }),
+                    order: TempOrder
+                };
 
-            return {
-                nodeArray: [{ "key": NodeKeyNow, "type": "SEL" }].concat(NodeLink1.nodeArray, NodeLink2.nodeArray),
-                linkArray: [{ "from": NodeKeyNow, "frompid": "N", "to": NodeKey, "topid": PortId },
-                { "from": CName, "frompid": "OUT", "to": NodeKeyNow, "topid": "SI" }].concat(NodeLink1.linkArray, NodeLink2.linkArray)
-            };
+                countKey++;
+                var NodeKeyNow = countKey;
+                var NodeLink1 = ViewGen0(pnp1, NodeKeyNow, "0");
+                var NodeLink2 = ViewGen0(pnp2, NodeKeyNow, "1");
+
+                return {
+                    nodeArray: [{ "key": NodeKeyNow, "type": "SEL" }].concat(NodeLink1.nodeArray, NodeLink2.nodeArray),
+                    linkArray: [{ "from": NodeKeyNow, "frompid": "N", "to": NodeKey, "topid": PortId },
+                    { "from": CName, "frompid": "OUT", "to": NodeKeyNow, "topid": "SI" }].concat(NodeLink1.linkArray, NodeLink2.linkArray)
+                };
+            }
         }
     };
     for (x of pn.order) {
